@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Add Feedback – Customer Feedback Application</title>
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<style>
+.form-box {
+	background-color: #f8f9fa;
+	padding: 30px;
+	margin: auto;
+	margin-top: 50px;
+	border-radius: 10px;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+button {
+	min-width: 100px;
+}
+</style>
+</head>
+<body>
+
+	<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+	<div class="container col-md-6">
+		<div class="form-box">
+			<h3>Add New Feedback</h3>
+
+			<p class="text-success" th:if="${param.success}"
+				th:text="${param.success}"></p>
+
+			<form th:action="@{/feedback/save}" method="post"
+				th:object="${feedback}">
+
+				<div class="mb-3">
+					<label for="write_feedback">Your Feedback</label>
+					<textarea th:field="*{write_feedback}" class="form-control"
+						rows="4" placeholder="e.g., It was a great experience!" required></textarea>
+				</div>
+
+				<div class="d-flex">
+					<button type="submit" class="btn btn-success me-2">Submit</button>
+					<a th:href="@{/dashboard}" class="btn btn-secondary">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All Feedbacks – Customer Feedback Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card-table {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .action-btns a, .action-btns button {
+            margin-right: 8px;
+        }
+
+        .modal-header {
+            background-color: #0d6efd;
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-body p {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .pagination .page-link {
+            color: #0d6efd;
+        }
+
+        .pagination .active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+
+        h2.title-header {
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-5">
+    <h2 class="text-center title-header">All Feedbacks</h2>
+
+    <p class="text-success text-center mt-3" th:if="${param.success}" th:text="${param.success}"></p>
+
+
+    <div class="search-box text-end">
+        <input type="text" id="feedbackSearch" class="form-control w-25 d-inline-block"
+               placeholder="Search feedback her..." onkeyup="filterFeedbacks()">
+    </div>
+
+    <div class="card-table mt-2">
+        <div class="table-responsive">
+            <table id="feedbackTable" class="table table-bordered table-hover align-middle text-center">
+                <thead class="table-primary">
+                <tr>
+                    <th>Feedback</th>
+                    <th>Date Time</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fb : ${feedbackPage.content}">
+                    <td th:text="${fb.write_feedback}">Feedback content</td>
+                    <td th:text="${#temporals.format(fb.dateTime,'dd-MMM-yyyy HH:mm')}">04-Jul-2025 12:00</td>
+                    <td class="action-btns">
+                        <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                th:attr="data-bs-target='#modal__' + ${fb.feedback_id}">View
+                        </button>
+                        <a th:href="@{'/feedback/edit/' + ${fb.feedback_id}}" class="btn btn-warning btn-sm">Update</a>
+                        <a th:href="@{'/feedback/delete/' + ${fb.feedback_id}}" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Do you want to delete this feedback?');">Delete</a>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(feedbackPage.content)}">
+                    <td colspan="3" class="text-center text-muted">No feedbacks found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{'/feedback/all?page=' + ${currentPage - 1}}">Previous</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{'/feedback/all?page=' + ${i}}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{'/feedback/all?page=' + ${currentPage + 1}}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<div th:each="fb : ${feedbackPage.content}">
+    <div class="modal fade" th:id="'modal__' + ${fb.feedback_id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Feedback Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Feedback:</strong> <span th:text="${fb.write_feedback}">Great!</span></p>
+                    <p><strong>Date &amp; Time:</strong>
+                        <span th:text="${#temporals.format(fb.dateTime,'dd-MMM-yyyy HH:mm')}">04‑Jul‑2025 12:00</span>
+                    </p>
+                    <p><strong>User:</strong> <span th:text="${fb.user.username}">gokul</span></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function filterFeedbacks() {
+        const input = document.getElementById("feedbackSearch");
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById("feedbackTable");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            const td = rows[i].getElementsByTagName("td")[0]; 
+            if (td) {
+                const txtValue = td.textContent || td.innerText;
+                rows[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
